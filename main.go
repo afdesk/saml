@@ -54,6 +54,7 @@ func main() {
 	app := http.HandlerFunc(hello)
 	http.Handle("/hello", samlSP.RequireAccount(app))
 	http.Handle("/saml/", samlSP)
+	fmt.Print("Server is running... go to http://127.0.0.1:8000/hello")
 	panicIfError(http.ListenAndServe(":8000", nil))
 }
 func panicIfError(err error) {
