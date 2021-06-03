@@ -1,13 +1,9 @@
 # SAML and Auth0 sample
-## Build
+## Run custom proxy
+1. Add `Auth0 Id`  to `docker-compose.yml`.
+2. Run docker compose:
 ```shell
-docker build -t samlauth0 .
+docker-compose up --build --remove-orphans
 ```
-## Run
-```shell
-docker run -it -e AUTH0_ID=<Auth0 Client ID> -p 8000:8000 --rm samlauth0:latest
-```
-## Usage
-```
-http://127.0.0.1:8000/hello
-```
+3. Set up to your browser next proxy server: `127.0.0.1`, port `8080`.
+4. go to `http://google.com`
