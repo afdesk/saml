@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
+	"github.com/afdesk/saml/tokenservice"
 	"github.com/crewjam/saml/samlsp"
 	"net/http"
 	"net/url"
@@ -19,16 +20,24 @@ var sessionkey = "./sessionkey"
 //var serverurl = "http://127.0.0.1:8000"
 var serverurl = "http://mysaml.com"
 
-const correctToken = "my_jwt_token"
-const cookieName = "saml_cookie"
+const cookieToken = "saml_cookie"
+const cookieUserName = "saml_user"
+const endpoint = "http://google.com"
 
 func index(w http.ResponseWriter, r *http.Request) {
-	c, err := r.Cookie(cookieName)
-	if err != nil || c.Value != correctToken {
+	u, err := r.Cookie(cookieUserName)
+	if err != nil {
 		http.Redirect(w, r, "/hello", http.StatusSeeOther)
 		return
 	}
-	http.Redirect(w, r, "https://google.com", http.StatusSeeOther)
+	c, err := r.Cookie(cookieToken)
+	if err != nil || !tokenservice.IsCorrectUser(c.Value, u.Value, sessionkey) {
+		http.Redirect(w, r, "/hello", http.StatusSeeOther)
+		return
+	}
+	http.SetCookie(w, c)
+	http.SetCookie(w, u)
+	http.Redirect(w, r, endpoint, http.StatusSeeOther)
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {
@@ -36,19 +45,26 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	if s == nil {
 		return
 	}
-	_, ok := s.(samlsp.SessionWithAttributes)
+	sa, ok := s.(samlsp.SessionWithAttributes)
 	if !ok {
 		return
 	}
-	c := &http.Cookie{
-		Name:   "saml_cookie",
-		Value:  correctToken,
+	user := sa.GetAttributes().Get("http://schemas.auth0.com/nickname")
+
+	u := &http.Cookie{
+		Name:   cookieUserName,
+		Value:  user,
 		Path:   "/",
-		Domain: "",
+	}
+
+	c := &http.Cookie{
+		Name:   cookieToken,
+		Value:  tokenservice.GetJWT(user, sessionkey),
+		Path:   "/",
 	}
 	http.SetCookie(w, c)
-	//	fmt.Fprintf(w, "Hello, %s!", sa.GetAttributes().Get("http://schemas.auth0.com/nickname"))
-	http.Redirect(w, r, "https://google.com", http.StatusSeeOther)
+	http.SetCookie(w, u)
+	http.Redirect(w, r, endpoint, http.StatusSeeOther)
 }
 
 func main() {
