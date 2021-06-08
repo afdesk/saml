@@ -19,6 +19,7 @@ var sessionkey = "./sessionkey"
 
 //var serverurl = "http://127.0.0.1:8000"
 var serverurl = "http://auth.aquasec.com"
+var callbackUrl = "http://nginx.aquasec.com"
 
 const cookieToken = "saml_cookie"
 const cookieUserName = "saml_user"
@@ -69,7 +70,8 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, c)
 	http.SetCookie(w, u)
-	w.WriteHeader(http.StatusOK)
+	http.Redirect(w,r, callbackUrl, http.StatusSeeOther)
+//	w.WriteHeader(http.StatusOK)
 }
 
 func main() {
