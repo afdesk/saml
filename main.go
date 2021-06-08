@@ -18,11 +18,10 @@ var sessioncert = "./sessioncert"
 var sessionkey = "./sessionkey"
 
 //var serverurl = "http://127.0.0.1:8000"
-var serverurl = "http://mysaml.com"
+var serverurl = "http://auth.aquasec.com"
 
 const cookieToken = "saml_cookie"
 const cookieUserName = "saml_user"
-const endpoint = "http://google.com"
 
 func index(w http.ResponseWriter, r *http.Request) {
 	u, err := r.Cookie(cookieUserName)
@@ -35,9 +34,11 @@ func index(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/hello", http.StatusSeeOther)
 		return
 	}
-	http.SetCookie(w, c)
-	http.SetCookie(w, u)
-	http.Redirect(w, r, endpoint, http.StatusSeeOther)
+	w.WriteHeader(http.StatusOK)
+}
+
+func ok(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }
 
 func hello(w http.ResponseWriter, r *http.Request) {
@@ -52,19 +53,19 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	user := sa.GetAttributes().Get("http://schemas.auth0.com/nickname")
 
 	u := &http.Cookie{
-		Name:   cookieUserName,
-		Value:  user,
-		Path:   "/",
+		Name:  cookieUserName,
+		Value: user,
+		Path:  "/",
 	}
 
 	c := &http.Cookie{
-		Name:   cookieToken,
-		Value:  tokenservice.GetJWT(user, sessionkey),
-		Path:   "/",
+		Name:  cookieToken,
+		Value: tokenservice.GetJWT(user, sessionkey),
+		Path:  "/",
 	}
 	http.SetCookie(w, c)
 	http.SetCookie(w, u)
-	http.Redirect(w, r, endpoint, http.StatusSeeOther)
+	w.WriteHeader(http.StatusOK)
 }
 
 func main() {
@@ -91,9 +92,11 @@ func main() {
 	})
 	app := http.HandlerFunc(hello)
 	http.HandleFunc("/", index)
+	http.HandleFunc("/ok", ok)
 	http.Handle("/hello", samlSP.RequireAccount(app))
 	http.Handle("/saml/", samlSP)
-	fmt.Print("Server is running...")
+
+	fmt.Printf("Server is running... go to %s/hello", serverurl)
 	panicIfError(http.ListenAndServe(":8000", nil))
 }
 func panicIfError(err error) {
