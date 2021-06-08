@@ -5,9 +5,9 @@ import (
 	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509"
-	"fmt"
 	"github.com/afdesk/saml/tokenservice"
 	"github.com/crewjam/saml/samlsp"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -26,12 +26,14 @@ const cookieUserName = "saml_user"
 func index(w http.ResponseWriter, r *http.Request) {
 	u, err := r.Cookie(cookieUserName)
 	if err != nil {
-		http.Redirect(w, r, "/hello", http.StatusSeeOther)
+		log.Print("The cookie for a user doesn't exist")
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	c, err := r.Cookie(cookieToken)
 	if err != nil || !tokenservice.IsCorrectUser(c.Value, u.Value, sessionkey) {
-		http.Redirect(w, r, "/hello", http.StatusSeeOther)
+		log.Print("The cookie for a token has problems")
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	w.WriteHeader(http.StatusOK)
@@ -55,12 +57,14 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	u := &http.Cookie{
 		Name:  cookieUserName,
 		Value: user,
+		Domain: "aquasec.com",
 		Path:  "/",
 	}
 
 	c := &http.Cookie{
 		Name:  cookieToken,
 		Value: tokenservice.GetJWT(user, sessionkey),
+		Domain: "aquasec.com",
 		Path:  "/",
 	}
 	http.SetCookie(w, c)
@@ -96,7 +100,7 @@ func main() {
 	http.Handle("/hello", samlSP.RequireAccount(app))
 	http.Handle("/saml/", samlSP)
 
-	fmt.Printf("Server is running... go to %s/hello", serverurl)
+	log.Printf("Server is running... go to %s/hello\n", serverurl)
 	panicIfError(http.ListenAndServe(":8000", nil))
 }
 func panicIfError(err error) {
