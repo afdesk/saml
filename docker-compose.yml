@@ -8,8 +8,8 @@ services:
       - AUTH0_ID=<AUTH0_ID>
 
   myproxy:
-    image: nginx:alpine
+    image: nginx:1.21.0
     volumes:
     - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     ports:
-    - 8080:80
+    - 80:80
