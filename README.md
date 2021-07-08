@@ -2,7 +2,7 @@
 ## Set up Auth0
 Add to `Addon: SAML2 Web App` next `Application Callback URL`:
 ```
-http://auth.aquasec.com/saml/acs
+https://auth.aquasec.com/saml/acs
 ```
 ## Set up domain names
 Add domains to `/etc/hosts`:
@@ -17,4 +17,4 @@ Add domains to `/etc/hosts`:
 docker-compose up --build --remove-orphans
 ```
 ## Test
-go to [http://nginx.aquasec.com](http://nginx.aquasec.com/)
+go to [https://nginx.aquasec.com](https://nginx.aquasec.com/)
