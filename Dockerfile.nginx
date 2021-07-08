@@ -1,0 +1,8 @@
+FROM nginx:1.21.0
+
+RUN apt-get update && apt-get install -y  wget ca-certificates openssl
+
+RUN mkdir /certs
+RUN openssl req -x509 -newkey rsa:4096 -nodes -batch -keyout /certs/sessionkey -out /certs/sessioncert -days 365
+
+

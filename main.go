@@ -18,8 +18,8 @@ var sessioncert = "./sessioncert"
 var sessionkey = "./sessionkey"
 
 //var serverurl = "http://127.0.0.1:8000"
-var serverurl = "http://auth.aquasec.com"
-var callbackUrl = "http://nginx.aquasec.com"
+var serverurl = "https://auth.aquasec.com"
+var callbackUrl = "https://nginx.aquasec.com"
 
 const cookieToken = "saml_cookie"
 const cookieUserName = "saml_user"
