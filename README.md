@@ -11,7 +11,7 @@ Add domains to `/etc/hosts`:
 127.0.0.1 auth.aquasec.com
 ```
 ## Run custom proxy
-1. Add `Auth0 Id`  to `docker-compose.yml`.
+1. Add `Auth0 Id`, `path to sessionCert` and `path to sessionKey`  to `docker-compose.yml`.
 2. Run docker compose:
 ```shell
 docker-compose up --build --remove-orphans
