@@ -45,15 +45,19 @@ func ok(w http.ResponseWriter, r *http.Request) {
 func hello(w http.ResponseWriter, r *http.Request) {
 	s := samlsp.SessionFromContext(r.Context())
 	if s == nil {
-		return
-	}
-	sa, ok := s.(samlsp.SessionWithAttributes)
-	if !ok {
-		log.Printf("Auth0 didn't return SessionWithAttributes")
+		log.Printf("samlsp.SessionFromContext is nill")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	user := sa.GetAttributes().Get("http://schemas.auth0.com/nickname")
+	user := "default"
+	sa, ok := s.(samlsp.SessionWithAttributes)
+	if !ok {
+		log.Print("Auth0 didn't return SessionWithAttributes.")
+		log.Printf(" Will use a defaul user name %q", user)
+	} else {
+		user = sa.GetAttributes().Get("http://schemas.auth0.com/nickname")
+		log.Printf(" Will use an user name %q", user)
+	}
 
 	u := &http.Cookie{
 		Name:  cookieUserName,
