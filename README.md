@@ -18,3 +18,10 @@ docker-compose up --build --remove-orphans
 ```
 ## Test
 go to [https://nginx.aquasec.com](https://nginx.aquasec.com/)
+
+## Certs rendering
+```
+mkdir certs
+cd certs
+openssl req -x509 -newkey rsa:4096 -nodes -batch -keyout session.key -out session.cert -days 365
+```
