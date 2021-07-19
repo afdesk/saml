@@ -13,11 +13,9 @@ import (
 	"os"
 )
 
-var metadataurl = "https://dev-phuduzc4.eu.auth0.com/samlp/metadata/"
 var sessioncert = "./sessioncert"
 var sessionkey = "./sessionkey"
 
-//var serverurl = "http://127.0.0.1:8000"
 var serverurl = "https://auth.aquasec.com"
 var callbackUrl = "https://nginx.aquasec.com"
 
@@ -51,6 +49,8 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	}
 	sa, ok := s.(samlsp.SessionWithAttributes)
 	if !ok {
+		log.Printf("Auth0 didn't return SessionWithAttributes")
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	user := sa.GetAttributes().Get("http://schemas.auth0.com/nickname")
@@ -71,7 +71,6 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, c)
 	http.SetCookie(w, u)
 	http.Redirect(w,r, callbackUrl, http.StatusSeeOther)
-//	w.WriteHeader(http.StatusOK)
 }
 
 func main() {
@@ -81,7 +80,7 @@ func main() {
 	keyPair.Leaf, err = x509.ParseCertificate(keyPair.Certificate[0])
 	panicIfError(err)
 
-	idpMetadataURL, err := url.Parse(metadataurl + os.Getenv("AUTH0_ID"))
+	idpMetadataURL, err := url.Parse(os.Getenv("AUTH0_METADATA_URL"))
 	panicIfError(err)
 
 	idpMetadata, err := samlsp.FetchMetadata(context.Background(), http.DefaultClient, *idpMetadataURL)
