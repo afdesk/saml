@@ -74,6 +74,11 @@ func hello(w http.ResponseWriter, r *http.Request) {
 	}
 	http.SetCookie(w, c)
 	http.SetCookie(w, u)
+	if t, err := r.Cookie("token"); err != nil {
+		log.Printf("Reading SAML token had the error: %v", err)
+	} else {
+		w.Header().Set("Authorization", t.Value)
+	}
 	http.Redirect(w,r, callbackUrl, http.StatusSeeOther)
 }
 
